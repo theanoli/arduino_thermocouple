@@ -2,13 +2,7 @@
 import time
 
 ###ISSUES
-# how to get this to talk to the DB
-# what if the port is unavailable?
-# how to log: with image metadata (i.e, each image gets a set of temp
-#    readings? 
-# Or log separate from image metadata, combine this with the images
-#    later?
-# 
+# Maybe this doesn't need to be a class...?
 
 
 log = 'temp_log.txt'
@@ -16,47 +10,62 @@ open(log,'wb').close()
 
         
 class getTemp():
-    def __init__(self, tm):
+    def __init__(self):
         self.port = 'COM3'
         self.log = 'temp_log.txt'
         self.tm = None
         
     def checkIfAvailable(self):
         try: 
-            self.tm = serial.Serial(self.port, 9600, timeout=0)
+            self.tm = serial.Serial(self.port, 9600, timeout=None)
             return 0
         except serial.serialutil.SerialException:
             print("Port {0} is unavailable!".format(self.port))
             return 1
     
-    # read to console with timestamp
-    def readTempToConsole(self):
-        temp_dict = {"temp_internal" : [],
-                     "temp_celsius" : [],
-                     "temp_farenheit" : []
-                     "temp_timer" : []}
+    def readFromSerial(self,serial_obj):
         while True: 
-            try: 
-                self.tm.write("ping")
-                
-                temps = [t.decode().strip() for t in self.tm.readlines()]
-                temp_dict["temp_internal"].append(temps[0])
-                temp_dict["temp_celsius"].append(temps[1])
-                temp_dict["temp_farenheit"].append(temps[2])
-                temp_dict["temp_timer"].append(time.time())
-                
-                self.tm.flush()
-                
-                time.sleep(5)
+            processIncomingByte(self,self.tm.read())
+    
+    def processIncomingByte(self,byte):
+        # try loop to close this process via keyboard...
+        try:
+            maxBytes = 8 
+            
+            # terminator reached, process input line & reset thermo_output
+            if byte == ">":
+                temp_dict = readTempToDict(thermo_output.split(','))
+                self.thermo_output = ""
+            
+            # if thermo_output gets too long before reaching maxBytes, 
+            # reset, otherwise keep adding     
+            else:     
+                if len(temps) < maxBytes:
+                    self.thermo_output + byte
+                else: 
+                    self.thermo_output = ""
+                    
+            return temp_dict
+        
+        except KeyboardInterrupt: 
+            self.tm.close()
+            exit()
+        
+        
+    def readTempToDict(self,temps):            
+        temp_dict = {
+                    "temp_internal" : temps[0],
+                    "temp_celsius" : temps[1], 
+                    "temp_farenheit" : temps[2] 
+                     }            
 
-            except KeyboardInterrupt: 
-                self.tm.close()
-                exit()
-                
+        return temp_dict      
         
     # maybe doesn't need to be a module, but need to remember to 
     # close ports when done
-    def closeSerialPort(self,port_obj):
-        port_obj.close()
+    def closeSerialPort(self,serial_obj):
+        serial_obj.close()
             
+            
+
                      
