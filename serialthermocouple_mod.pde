@@ -15,6 +15,9 @@
  ****************************************************/
 
 #include "Adafruit_MAX31855.h"
+#include <stdio.h>
+
+char endOfTempDelimiter = ">";
 
 int thermoDO = 3;
 int thermoCS = 4;
@@ -25,34 +28,44 @@ Adafruit_MAX31855 thermocouple(thermoCLK, thermoCS, thermoDO);
 void setup() {
   Serial.begin(9600);
   
-  Serial.println("MAX31855 test");
+  // Serial.println("MAX31855 test");
   // wait for MAX chip to stabilize
   delay(500);
-  
-  // basic readout test, just print the current temp
-  if (Serial.available() > 0) {
-		double i = thermocouple.readInternal();
-  		double c = thermocouple.readCelsius();
-  		double f = thermocouple.readFarenheit();
-  		char nan_placeholder = "0"; 
-  	
-  		Serial.println(i)
-  	
-  		if (isnan(c)) {
-  			Serial.println(nan_placeholder);	
-  		} else {
-  			Serial.println(c);
-  		}
-  	
- 	 	if (isnan(f)) {
- 	 		Serial.println(nan_placeholder);
-  		} else {
-  			Serial.println(f);
-  		}
-  	}
+
 }
   
-  
+//<II,FF,CC>  
  
 void loop() {
+		double readI = thermocouple.readInternal();
+		double readC = thermocouple.readCelsius(); 
+		double readF = thermocouple.readFarenheit();
+		
+		char* nan_placeholder = "00"; 
+		char output[9]; 
+				
+  		if (isnan(readC))
+  			readC = nan_placeholder;	
+  		
+  		if (isnan(readF)) 
+  			readF = nan_placeholder; 
+  		
+  		// Option 1...
+		Serial.print(readI); 
+		Serial.print(","); 
+		Serial.print(readC); 
+		Serial.print(","); 
+		Serial.print(readF);
+		Serial.print(endOfTempDelimiter);
+		
+  		
+  		snprintf(output, sizeof(output), "%2s,%2s,%2s\n", readI,
+  				readC, readF);
+  		  		
+  		Serial.println(i);
+  		
+  		delay(1000);
+  		
+  		
+	}
 }
