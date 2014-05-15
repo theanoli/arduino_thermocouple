@@ -15,7 +15,6 @@
  ****************************************************/
 
 #include "Adafruit_MAX31855.h"
-#include <stdio.h>
 
 char endOfTempDelimiter = ">";
 
@@ -37,35 +36,26 @@ void setup() {
 //<II,FF,CC>  
  
 void loop() {
-		double readI = thermocouple.readInternal();
-		double readC = thermocouple.readCelsius(); 
-		double readF = thermocouple.readFarenheit();
-		
-		char* nan_placeholder = "00"; 
-		char output[9]; 
-				
-  		if (isnan(readC))
-  			readC = nan_placeholder;	
-  		
-  		if (isnan(readF)) 
-  			readF = nan_placeholder; 
-  		
-  		// Option 1...
-		Serial.print(readI); 
-		Serial.print(","); 
-		Serial.print(readC); 
-		Serial.print(","); 
-		Serial.print(readF);
-		Serial.print(endOfTempDelimiter);
-		
-  		
-  		snprintf(output, sizeof(output), "%2s,%2s,%2s\n", readI,
-  				readC, readF);
-  		  		
-  		Serial.println(i);
-  		
-  		delay(1000);
-  		
-  		
-	}
+	double readI = thermocouple.readInternal();
+	double readC = thermocouple.readCelsius(); 
+	double readF = thermocouple.readFarenheit();
+	
+	char* nan_placeholder = "00"; 
+	char output[9]; 
+			
+	if (isnan(readC))
+		readC = nan_placeholder;	
+	
+	if (isnan(readF)) 
+		readF = nan_placeholder; 
+	
+	// Option 1...
+	Serial.print(readI); 
+	Serial.print(","); 
+	Serial.print(readC); 
+	Serial.print(","); 
+	Serial.print(readF);
+	Serial.print(endOfTempDelimiter);
+	
+	delay(1000);
 }
