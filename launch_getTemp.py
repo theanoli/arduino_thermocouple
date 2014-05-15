@@ -1,10 +1,13 @@
 from getTemp import *
 
 F = getTemp()
+portAvailability = F.checkPortAvailability()
 
 
-if F.checkIfAvailable() == 0:
-    temp_dict = F.readFromSerial(F.checkIfAvailable().tm)
-    print(temp_dict)
+if portAvailability == 0:
+    while True: 
+        temp_dict = F.readFromSerial(F.tm)
+        print([temp_dict[key]+"\t" for key in temp_dict])
+        print("\n")
 else: 
-    print("something wrong with your ports!")
+    print(portAvailability.err)

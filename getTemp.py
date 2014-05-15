@@ -3,36 +3,36 @@ import time
 
 ###ISSUES
 # Maybe this doesn't need to be a class...?
+# get clarification on self/return    
 
 
-log = 'temp_log.txt'
-open(log,'wb').close()
+
+#log = 'temp_log.txt'
+#open(log,'wb').close()
 
         
 class getTemp():
-    def __init__(self):
+    def __init__(self,log):
         self.port = 'COM3'
-        self.log = 'temp_log.txt'
-        self.tm = None
+        # Setting timeout to 0 opens port in non-blocking mode; None waits forever
+        self.tm = serial.Serial(None, 9600, timeout=None)
+        #self.log = log 
         
-    def checkIfAvailable(self):
+    def checkPortAvailability(self):
         try: 
-            self.tm = serial.Serial(self.port, 9600, timeout=None)
+            self.tm.open(self.port)
             return 0
         except serial.serialutil.SerialException:
-            print("Port {0} is unavailable!".format(self.port))
+            self.err = "Port {0} is unavailable!".format(self.port)
             return 1
-    
-    def readFromSerial(self,serial_obj):
-        while True: 
-            processIncomingByte(self,self.tm.read())
+        
     
     def processIncomingByte(self,byte):
-        # try loop to close this process via keyboard...
+        # try loop to close this process via keyboard during testing...
         try:
             maxBytes = 8 
             
-            # terminator reached, process input line & reset thermo_output
+            # terminator reached, process output line & reset thermo_output
             if byte == ">":
                 temp_dict = readTempToDict(thermo_output.split(','))
                 self.thermo_output = ""
@@ -51,7 +51,7 @@ class getTemp():
             self.tm.close()
             exit()
         
-        
+    
     def readTempToDict(self,temps):            
         temp_dict = {
                     "temp_internal" : temps[0],
@@ -60,6 +60,12 @@ class getTemp():
                      }            
 
         return temp_dict      
+
+
+    def readFromSerial(self,serial_obj):
+        temp_dict = processIncomingByte(self,self.tm.read())
+        return temp_dict
+
         
     # maybe doesn't need to be a module, but need to remember to 
     # close ports when done
